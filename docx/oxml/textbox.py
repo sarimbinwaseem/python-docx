@@ -15,9 +15,12 @@ from .xmlchemy import (
     ZeroOrOne,
 )
 
-XPATH_CHOICE = "./mc:Choice/w:drawing/wp:anchor/a:graphic/a:graphicData/wps:wsp/wps:txbx\
+# XPATH_CHOICE = "./mc:Choice/w:drawing/wp:anchor/a:graphic/a:graphicData/wps:wsp/wps:txbx\
+#     /w:txbxContent"
+# XPATH_FALLBACK = "./mc:Fallback/w:pict/v:*/v:textbox/w:txbxContent"
+XPATH_CHOICE = "./mc:Choice/w:drawing/wp:anchor/a:graphic/a:graphicData//wps:txbx\
     /w:txbxContent"
-XPATH_FALLBACK = "./mc:Fallback/w:pict/v:*/v:textbox/w:txbxContent"
+XPATH_FALLBACK = "./mc:Fallback/w:pict//v:textbox/w:txbxContent"
 
 
 class CT_TextBoxContent(BaseOxmlElement):
@@ -69,11 +72,11 @@ class TextBox(ElementProxy):
     formatting are stored in the document for legacy reasons.
     """
 
-    def __init__(self, element):
+    def __init__(self, element, parent=None):
         """
         Initialize using an ``<mc:AlternateContent>`` object
         """
-        super(TextBox, self).__init__(element)
+        super(TextBox, self).__init__(element, parent)
 
         try:
             (tbox1,) = element.xpath(XPATH_CHOICE)
@@ -85,6 +88,7 @@ class TextBox(ElementProxy):
             )
         self.tbox1 = TextBoxContent(tbox1, self)
         self.tbox2 = TextBoxContent(tbox2, self)
+
 
     def add_paragraph(self, text="", style=None):
         paragraph = self.tbox1.add_paragraph(text=text, style=style)
@@ -150,7 +154,7 @@ class AlternateContent(BaseOxmlElement):
     fallback = OneOrMore("mc:Fallback")
 
 
-def find_textboxes(element):
+def find_textboxes(element, parent=None):
     """
     List all text box objects in the document.
 
@@ -163,5 +167,5 @@ def find_textboxes(element):
         tbox1 = elem.xpath(XPATH_CHOICE)
         tbox2 = elem.xpath(XPATH_FALLBACK)
         if len(tbox1) == 1 and len(tbox2) == 1:
-            text_boxes.append(TextBox(elem))
+            text_boxes.append(TextBox(elem, parent))
     return text_boxes

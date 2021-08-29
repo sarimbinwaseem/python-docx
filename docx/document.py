@@ -8,6 +8,7 @@ from docx.oxml.textbox import find_textboxes
 from docx.blkcntnr import BlockItemContainer
 from docx.enum.section import WD_SECTION
 from docx.enum.text import WD_BREAK
+from docx.oxml.textbox import find_textboxes
 from docx.section import Section, Sections
 from docx.shared import ElementProxy, Emu
 
@@ -191,7 +192,7 @@ class Document(ElementProxy):
         """
         List all text box objects in the document.
         """
-        return find_textboxes(self._element)
+        return find_textboxes(self._element, self)
 
 
 class _Body(BlockItemContainer):
